@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const Campground = require('./models/campground');
+const campground = require('./models/campground');
 
 const serverPort = 3000;
 const dbPort = 27017;
@@ -25,6 +26,8 @@ const app = express();
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+app.use(express.urlencoded({ extended: true }));
+
 // Home page
 app.get('/', (req, res) => {
     res.render('index');
@@ -34,6 +37,17 @@ app.get('/', (req, res) => {
 app.get('/campgrounds', async (req, res) => {
     const campgrounds = await Campground.find({});
     res.render('campgrounds/index', { campgrounds });
+});
+
+// New Campground route
+app.get('/campgrounds/new', (req, res) => {
+    res.render('campgrounds/new');
+});
+
+app.post('/campgrounds', async (req, res) => {
+    const newCampground = new Campground(req.body.campground);
+    await newCampground.save();
+    res.redirect(`/campgrounds/${ newCampground._id }`);
 });
 
 // Campground show route
